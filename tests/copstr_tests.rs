@@ -97,7 +97,7 @@ fn test_replace_err() -> Result<()> {
     let mut basic = Str::new("basic")?;
     let result = basic.replace("string");
     assert_eq!(result.unwrap_err(), copstr::Error::Overflow);
-    // assert_str(&basic, "basic");
+    assert_str(&basic, "basic");
     Ok(())
 }
 
@@ -141,5 +141,6 @@ fn test_utf8_invalid_replace() -> Result<()> {
     let mut basic = Str::new("basic")?;
     let s = format!("ch{}", str::from_utf8(&SPARKLE_HEART)?);
     assert_eq!(basic.replace(s).unwrap_err(), copstr::Error::Overflow);
+    assert_str(&basic, "basic");
     Ok(())
 }

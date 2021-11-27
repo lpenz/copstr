@@ -66,11 +66,16 @@ impl<const SIZE: usize> Str<SIZE> {
     /// Replaces the string in-place.
     pub fn replace<S: AsRef<str>>(&mut self, string: S) -> Result<(), Error> {
         let s = string.as_ref();
-        self.1 = 0;
-        for ch in s.chars() {
-            self.push(ch)?;
+        let bytes = s.as_bytes();
+        let byteslen = bytes.len();
+        if byteslen > self.capacity() {
+            Err(Error::Overflow)
+        } else {
+            let dest = self.0.split_at_mut(byteslen).0;
+            dest.copy_from_slice(bytes);
+            self.1 = byteslen;
+            Ok(())
         }
-        Ok(())
     }
 
     /// Extracts a string slice containing the entire `Str`.
