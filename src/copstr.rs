@@ -18,6 +18,7 @@
 use core::convert::TryFrom;
 use std::error;
 use std::fmt;
+use std::ops;
 use std::str;
 
 /// Copy String type
@@ -80,7 +81,7 @@ impl<const SIZE: usize> Str<SIZE> {
 
     /// Extracts a string slice containing the entire `Str`.
     pub fn as_str(&self) -> &str {
-        // We can do this because we guarante self.0 is UTF-8
+        // SAFETY: self.0 is always UTF-8
         unsafe { str::from_utf8_unchecked(&self.0[0..self.1]) }
     }
 }
@@ -121,6 +122,14 @@ impl<const SIZE: usize> AsRef<[u8]> for Str<SIZE> {
 impl<const SIZE: usize> fmt::Display for Str<SIZE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
+    }
+}
+
+impl<const SIZE: usize> ops::Deref for Str<SIZE> {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        self.as_str()
     }
 }
 

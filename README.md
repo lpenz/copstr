@@ -4,7 +4,7 @@
 [![doc.rs](https://docs.rs/copstr/badge.svg)](https://docs.rs/copstr)
 
 
-# copstr: Yet Another COPy STRing module
+# copstr: COPy STRing module using const generic for capacity
 
 copstr's [`Str`] wraps a fixed-size array of `u8` and provides a
 string-like interface on top. The size is specified using a const

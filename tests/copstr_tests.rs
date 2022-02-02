@@ -32,6 +32,8 @@ fn assert_str(copstr: &Str, s: &str) {
     assert_eq!(copstr.to_string(), s.to_string());
     assert_eq!(copstr, &Str::try_from(s).unwrap());
     assert_eq!(copstr, &Str::new(s).unwrap());
+    assert_eq!(format!("{}", copstr), s);
+    assert_eq!(copstr.as_bytes(), s.as_bytes());
 }
 
 #[test]
