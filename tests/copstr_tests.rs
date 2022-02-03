@@ -53,6 +53,12 @@ fn test_basic() -> Result<()> {
 }
 
 #[test]
+fn test_new_trunc() -> Result<()> {
+    assert_str(&Str::new_trunc("bas\u{1F496}")?, "bas");
+    Ok(())
+}
+
+#[test]
 fn test_push() -> Result<()> {
     let mut no = Str::new("no")?;
     no.push('w')?;
@@ -100,6 +106,16 @@ fn test_replace_err() -> Result<()> {
     let result = basic.replace("string");
     assert_eq!(result.unwrap_err(), copstr::Error::Overflow);
     assert_str(&basic, "basic");
+    Ok(())
+}
+
+#[test]
+fn test_replace_trunc() -> Result<()> {
+    let mut basic = Str::new("basic")?;
+    basic.replace_trunc("string")?;
+    assert_str(&basic, "strin");
+    basic.replace_trunc("bas")?;
+    assert_str(&basic, "bas");
     Ok(())
 }
 

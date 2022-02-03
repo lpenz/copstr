@@ -37,6 +37,14 @@ impl<const SIZE: usize> Str<SIZE> {
         Ok(copstr)
     }
 
+    /// Returns a new [`Str`] with the contents specified by the
+    /// provided string-like entity; truncate if bigger than SIZE.
+    pub fn new_trunc<S: AsRef<str>>(string: S) -> Result<Self, Error> {
+        let mut copstr = Self::default();
+        copstr.replace_trunc(string)?;
+        Ok(copstr)
+    }
+
     /// Returns the capacity of this specific [`Str`] type.
     pub fn capacity(&self) -> usize {
         SIZE
@@ -77,6 +85,20 @@ impl<const SIZE: usize> Str<SIZE> {
             self.1 = byteslen;
             Ok(())
         }
+    }
+
+    /// Replaces the string in-place, truncate input to SIZE.
+    pub fn replace_trunc<S: AsRef<str>>(&mut self, string: S) -> Result<(), Error> {
+        let s = string.as_ref();
+        self.1 = 0;
+        for ch in s.chars() {
+            match self.push(ch) {
+                Err(Error::Overflow) => return Ok(()),
+                e @ Err(_) => return e,
+                Ok(()) => (),
+            }
+        }
+        Ok(())
     }
 
     /// Extracts a string slice containing the entire `Str`.
