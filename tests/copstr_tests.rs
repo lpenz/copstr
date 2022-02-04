@@ -54,7 +54,7 @@ fn test_basic() -> Result<()> {
 
 #[test]
 fn test_new_trunc() -> Result<()> {
-    assert_str(&Str::new_trunc("bas\u{1F496}")?, "bas");
+    assert_str(&Str::new_trunc("bas\u{1F496}"), "bas");
     Ok(())
 }
 
@@ -70,11 +70,9 @@ fn test_push() -> Result<()> {
 fn test_push_err() -> Result<()> {
     let mut basic = Str::new("basic")?;
     let result = basic.push('s');
-    if let Err(e) = &result {
-        eprintln!("{:?} {}", result, e);
-    }
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), copstr::Error::Overflow);
+    eprintln!("{}", result.clone().unwrap_err());
+    assert_eq!(result.unwrap_err(), copstr::ErrorOverflow);
     assert_str(&basic, "basic");
     Ok(())
 }
@@ -83,11 +81,11 @@ fn test_push_err() -> Result<()> {
 fn test_tryfrom_err() -> Result<()> {
     assert_eq!(
         Str::try_from("string").unwrap_err(),
-        copstr::Error::Overflow
+        copstr::ErrorOverflow::default()
     );
     assert_eq!(
         Str::try_from("length".as_bytes()).unwrap_err(),
-        copstr::Error::Overflow
+        copstr::Error::Overflow(copstr::ErrorOverflow)
     );
     Ok(())
 }
@@ -104,7 +102,7 @@ fn test_replace() -> Result<()> {
 fn test_replace_err() -> Result<()> {
     let mut basic = Str::new("basic")?;
     let result = basic.replace("string");
-    assert_eq!(result.unwrap_err(), copstr::Error::Overflow);
+    assert_eq!(result.unwrap_err(), copstr::ErrorOverflow);
     assert_str(&basic, "basic");
     Ok(())
 }
@@ -112,9 +110,9 @@ fn test_replace_err() -> Result<()> {
 #[test]
 fn test_replace_trunc() -> Result<()> {
     let mut basic = Str::new("basic")?;
-    basic.replace_trunc("string")?;
+    basic.replace_trunc("string");
     assert_str(&basic, "strin");
-    basic.replace_trunc("bas")?;
+    basic.replace_trunc("bas");
     assert_str(&basic, "bas");
     Ok(())
 }
@@ -147,6 +145,14 @@ fn test_utf8_replace() -> Result<()> {
 }
 
 #[test]
+fn test_utf8_overflow_tryfrom() -> Result<()> {
+    let result = Str::try_from("basics".as_bytes());
+    eprintln!("{}", result.clone().unwrap_err());
+    assert_matches!(result, Err(copstr::Error::Overflow(_)));
+    Ok(())
+}
+
+#[test]
 fn test_utf8_invalid_tryfrom() -> Result<()> {
     let result = Str::try_from(&INVALID_UTF8 as &[u8]);
     eprintln!("{}", result.clone().unwrap_err());
@@ -158,7 +164,7 @@ fn test_utf8_invalid_tryfrom() -> Result<()> {
 fn test_utf8_invalid_replace() -> Result<()> {
     let mut basic = Str::new("basic")?;
     let s = format!("ch{}", str::from_utf8(&SPARKLE_HEART)?);
-    assert_eq!(basic.replace(s).unwrap_err(), copstr::Error::Overflow);
+    assert_eq!(basic.replace(s).unwrap_err(), copstr::ErrorOverflow);
     assert_str(&basic, "basic");
     Ok(())
 }

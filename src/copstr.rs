@@ -31,18 +31,19 @@ pub struct Str<const SIZE: usize>([u8; SIZE], usize);
 impl<const SIZE: usize> Str<SIZE> {
     /// Returns a new [`Str`] with the contents specified by the
     /// provided string-like entity.
-    pub fn new<S: AsRef<str>>(string: S) -> Result<Self, Error> {
+    pub fn new<S: AsRef<str>>(string: S) -> Result<Self, ErrorOverflow> {
         let mut copstr = Self::default();
         copstr.replace(string)?;
         Ok(copstr)
     }
 
     /// Returns a new [`Str`] with the contents specified by the
-    /// provided string-like entity; truncate if bigger than SIZE.
-    pub fn new_trunc<S: AsRef<str>>(string: S) -> Result<Self, Error> {
+    /// provided string-like entity.
+    /// Truncates the input to SIZE.
+    pub fn new_trunc<S: AsRef<str>>(string: S) -> Self {
         let mut copstr = Self::default();
-        copstr.replace_trunc(string)?;
-        Ok(copstr)
+        copstr.replace_trunc(string);
+        copstr
     }
 
     /// Returns the capacity of this specific [`Str`] type.
@@ -56,13 +57,11 @@ impl<const SIZE: usize> Str<SIZE> {
     }
 
     /// Adds a char to the end of the string, if possible.
-    ///
-    /// Returns [`Error`] if the string would overflow.
-    pub fn push(&mut self, ch: char) -> Result<(), Error> {
+    pub fn push(&mut self, ch: char) -> Result<(), ErrorOverflow> {
         let mut buffer = [0; 4];
         let result = ch.encode_utf8(&mut buffer).as_bytes();
         if result.len() > self.capacity() - self.byte_len() {
-            Err(Error::Overflow)
+            Err(ErrorOverflow::default())
         } else {
             let fromlen = self.0.split_at_mut(self.1).1;
             let dest = fromlen.split_at_mut(result.len()).0;
@@ -72,13 +71,13 @@ impl<const SIZE: usize> Str<SIZE> {
         }
     }
 
-    /// Replaces the string in-place.
-    pub fn replace<S: AsRef<str>>(&mut self, string: S) -> Result<(), Error> {
+    /// Replace the string in-place.
+    pub fn replace<S: AsRef<str>>(&mut self, string: S) -> Result<(), ErrorOverflow> {
         let s = string.as_ref();
         let bytes = s.as_bytes();
         let byteslen = bytes.len();
         if byteslen > self.capacity() {
-            Err(Error::Overflow)
+            Err(ErrorOverflow::default())
         } else {
             let dest = self.0.split_at_mut(byteslen).0;
             dest.copy_from_slice(bytes);
@@ -87,18 +86,16 @@ impl<const SIZE: usize> Str<SIZE> {
         }
     }
 
-    /// Replaces the string in-place, truncate input to SIZE.
-    pub fn replace_trunc<S: AsRef<str>>(&mut self, string: S) -> Result<(), Error> {
+    /// Replace the string in-place; truncate input to SIZE.
+    pub fn replace_trunc<S: AsRef<str>>(&mut self, string: S) {
         let s = string.as_ref();
         self.1 = 0;
         for ch in s.chars() {
             match self.push(ch) {
-                Err(Error::Overflow) => return Ok(()),
-                e @ Err(_) => return e,
+                Err(ErrorOverflow {}) => return,
                 Ok(()) => (),
             }
         }
-        Ok(())
     }
 
     /// Extracts a string slice containing the entire `Str`.
@@ -115,17 +112,18 @@ impl<const SIZE: usize> Default for Str<SIZE> {
 }
 
 impl<const SIZE: usize> TryFrom<&str> for Str<SIZE> {
-    type Error = Error;
-    fn try_from(string: &str) -> Result<Self, Error> {
+    type Error = ErrorOverflow;
+    fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string)
     }
 }
 
 impl<const SIZE: usize> TryFrom<&[u8]> for Str<SIZE> {
     type Error = Error;
-    fn try_from(arr: &[u8]) -> Result<Self, Error> {
+    fn try_from(arr: &[u8]) -> Result<Self, Self::Error> {
         let s = str::from_utf8(arr)?;
-        Self::new(s)
+        let s = Self::new(s)?;
+        Ok(s)
     }
 }
 
@@ -164,11 +162,24 @@ impl<const SIZE: usize> Eq for Str<SIZE> {}
 
 /* Errors: **********************************************************/
 
-/// copstr errors enum
+/// Error used in functions that can only fail due to overflowing the
+/// buffer
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ErrorOverflow;
+
+impl error::Error for ErrorOverflow {}
+
+impl fmt::Display for ErrorOverflow {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "overflow")
+    }
+}
+
+/// Generic copstr error type
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Error {
     /// The provided input overflows the size of the [`Str`]
-    Overflow,
+    Overflow(ErrorOverflow),
     /// The provided input was not valid UTF-8
     Utf8(str::Utf8Error),
 }
@@ -181,10 +192,16 @@ impl From<str::Utf8Error> for Error {
     }
 }
 
+impl From<ErrorOverflow> for Error {
+    fn from(e: ErrorOverflow) -> Self {
+        Error::Overflow(e)
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Overflow => write!(f, "overflow"),
+            Error::Overflow(ref e) => write!(f, "{}", e),
             Error::Utf8(ref e) => write!(f, "{}", e),
         }
     }
