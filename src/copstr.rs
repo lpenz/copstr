@@ -18,6 +18,7 @@
 use core::convert::TryFrom;
 use std::error;
 use std::fmt;
+use std::iter;
 use std::ops;
 use std::str;
 
@@ -159,6 +160,20 @@ impl<const SIZE: usize> PartialEq for Str<SIZE> {
     }
 }
 impl<const SIZE: usize> Eq for Str<SIZE> {}
+
+impl<const SIZE: usize> iter::FromIterator<char> for Str<SIZE> {
+    /// FromIterator truncates the input to SIZE
+    fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
+        let mut s = Str::default();
+        for ch in iter {
+            match s.push(ch) {
+                Err(ErrorOverflow {}) => break,
+                Ok(()) => (),
+            }
+        }
+        s
+    }
+}
 
 /* Errors: **********************************************************/
 

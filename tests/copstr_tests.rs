@@ -168,3 +168,10 @@ fn test_utf8_invalid_replace() -> Result<()> {
     assert_str(&basic, "basic");
     Ok(())
 }
+
+#[test]
+fn test_fromiter() -> Result<()> {
+    assert_eq!("basic".chars().collect::<Str>(), Str::new("basic")?);
+    assert_eq!("strings".chars().collect::<Str>(), Str::new("strin")?);
+    Ok(())
+}
