@@ -15,7 +15,7 @@
 //! functions guarantee that the contents are valid UTF-8 and return
 //! an error if they are not.
 
-use core::convert::TryFrom;
+use std::convert::TryFrom;
 use std::error;
 use std::fmt;
 use std::iter;
@@ -92,9 +92,8 @@ impl<const SIZE: usize> Str<SIZE> {
         let s = string.as_ref();
         self.1 = 0;
         for ch in s.chars() {
-            match self.push(ch) {
-                Err(ErrorOverflow {}) => return,
-                Ok(()) => (),
+            if let Err(ErrorOverflow {}) = self.push(ch) {
+                return;
             }
         }
     }
@@ -166,9 +165,8 @@ impl<const SIZE: usize> iter::FromIterator<char> for Str<SIZE> {
     fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
         let mut s = Str::default();
         for ch in iter {
-            match s.push(ch) {
-                Err(ErrorOverflow {}) => break,
-                Ok(()) => (),
+            if let Err(ErrorOverflow {}) = s.push(ch) {
+                break;
             }
         }
         s
