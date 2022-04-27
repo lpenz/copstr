@@ -53,6 +53,12 @@ fn test_basic() -> Result<()> {
 }
 
 #[test]
+fn test_empty() -> Result<()> {
+    assert_eq!(Str::EMPTY, Str::default());
+    Ok(())
+}
+
+#[test]
 fn test_new_trunc() -> Result<()> {
     assert_str(&Str::new_trunc("bas\u{1F496}"), "bas");
     Ok(())

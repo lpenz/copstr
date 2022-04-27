@@ -30,6 +30,9 @@ use std::str;
 pub struct Str<const SIZE: usize>([u8; SIZE], usize);
 
 impl<const SIZE: usize> Str<SIZE> {
+    /// The empty string with at most SIZE octets.
+    pub const EMPTY: Str<SIZE> = Str([0; SIZE], 0);
+
     /// Returns a new [`Str`] with the contents specified by the
     /// provided string-like entity.
     pub fn new<S: AsRef<str>>(string: S) -> Result<Self, ErrorOverflow> {
@@ -107,7 +110,7 @@ impl<const SIZE: usize> Str<SIZE> {
 
 impl<const SIZE: usize> Default for Str<SIZE> {
     fn default() -> Self {
-        Str([0; SIZE], 0)
+        Self::EMPTY
     }
 }
 
