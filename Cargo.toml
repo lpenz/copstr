@@ -8,6 +8,8 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/lpenz/copstr"
 repository = "https://github.com/lpenz/copstr"
+categories = ["rust-patterns"]
+keywords = ["string", "copy"]
 
 [dev-dependencies]
-anyhow = "1.0.45"
+anyhow = "1.0.57"
