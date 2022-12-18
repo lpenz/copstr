@@ -12,4 +12,4 @@ categories = ["rust-patterns"]
 keywords = ["string", "copy"]
 
 [dev-dependencies]
-anyhow = "1.0.57"
+anyhow = "1.0.67"

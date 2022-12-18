@@ -176,6 +176,14 @@ fn test_utf8_invalid_replace() -> Result<()> {
 }
 
 #[test]
+fn test_hash() -> Result<()> {
+    let mut set = std::collections::HashSet::<Str>::new();
+    set.insert(Str::new("basic")?);
+    assert_eq!(set.into_iter().collect::<Vec<_>>(), &[Str::new("basic")?]);
+    Ok(())
+}
+
+#[test]
 fn test_fromiter() -> Result<()> {
     assert_eq!("basic".chars().collect::<Str>(), Str::new("basic")?);
     assert_eq!("strings".chars().collect::<Str>(), Str::new("strin")?);

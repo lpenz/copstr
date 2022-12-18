@@ -18,6 +18,7 @@
 use std::convert::TryFrom;
 use std::error;
 use std::fmt;
+use std::hash;
 use std::iter;
 use std::ops;
 use std::str;
@@ -162,6 +163,12 @@ impl<const SIZE: usize> PartialEq for Str<SIZE> {
     }
 }
 impl<const SIZE: usize> Eq for Str<SIZE> {}
+
+impl<const SIZE: usize> hash::Hash for Str<SIZE> {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.as_str().hash(state);
+    }
+}
 
 impl<const SIZE: usize> iter::FromIterator<char> for Str<SIZE> {
     /// FromIterator truncates the input to SIZE
