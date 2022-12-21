@@ -44,7 +44,7 @@
 //! string.replace_trunc("stringification");
 //! assert_eq!(string.as_str(), "string");
 //!
-//! // `copstr::Str` implements Deref<Target=str>, so all `str` //
+//! // `copstr::Str` implements Deref<Target=str>, so all `str`
 //! // methods are available:
 //! let split = format!("{:?}", string.split_at(3));
 //! assert_eq!(split, r#"("str", "ing")"#);
@@ -56,8 +56,15 @@
 //!     // ...
 //!     comment: copstr::Str<10>,
 //! }
+//!
+//! // We can create `copstr` in const contexts:
+//! const TEST: copstr::Str<4> = copstr::Str::<4>::new_const("TEST");
+//!
+//! // We check that they fit in const context - the following doesn't compile:
+//! // const TEST_BAD: copstr::Str<3> = copstr::Str::<3>::new_const("TEST");
+//!
 //! # Ok(()) }
 //! ```
 
-mod copstr;
+pub mod copstr;
 pub use self::copstr::*;

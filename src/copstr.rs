@@ -57,10 +57,16 @@ impl<const SIZE: usize> Str<SIZE> {
     /// Create a new [`Str`] in const context, with the contents specified by the
     /// provided string.
     ///
-    /// This function works in const context but it doesn't guarantee
-    /// well-formed strings.
+    /// <p style="background:rgba(255,181,77,0.16);padding:0.75em;">
+    /// <strong>WARNING:</strong> this function works in const context
+    /// but it doesn't guarantee well-formed strings and can generate
+    /// undefined behavior if misused.
+    /// </p>
     ///
-    /// This function panics if the string doesn't fit in SIZE bytes.
+    /// This function panics if the string doesn't fit in SIZE bytes:
+    /// ```compile_fail
+    /// const TEST: copstr::Str<3> = copstr::Str::<3>::new_const("test");
+    /// ```
     pub const fn new_const(string: &str) -> Self {
         Self::new_const_u8(string.as_bytes())
     }
@@ -77,10 +83,16 @@ impl<const SIZE: usize> Str<SIZE> {
     /// Create a new [`Str`] in const context, with the contents specified by the
     /// provided array of `u8`.
     ///
-    /// This function works in const context but it doesn't guarantee
-    /// well-formed strings.
+    /// <p style="background:rgba(255,181,77,0.16);padding:0.75em;">
+    /// <strong>WARNING:</strong> this function works in const context
+    /// but it doesn't guarantee well-formed strings and can generate
+    /// undefined behavior if misused.
+    /// </p>
     ///
-    /// This function panics if the string doesn't fit in SIZE bytes.
+    /// This function panics if the string doesn't fit in SIZE bytes:
+    /// ```compile_fail
+    /// const TEST: copstr::Str<3> = copstr::Str::<3>::new_const_u8(b"test");
+    /// ```
     pub const fn new_const_u8(bytes: &[u8]) -> Self {
         assert!(bytes.len() <= SIZE);
         Self::new_const_trunc_u8(bytes)
@@ -204,7 +216,7 @@ impl<const SIZE: usize> fmt::Display for Str<SIZE> {
     }
 }
 
-/// The [`copstr::Str`] [`std::fmt::Debug`] implementation shows it as a string too
+/// The [`Str`] [`std::fmt::Debug`] implementation shows it as a string too
 impl<const SIZE: usize> fmt::Debug for Str<SIZE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
