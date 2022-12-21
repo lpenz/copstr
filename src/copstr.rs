@@ -32,10 +32,12 @@ pub struct Str<const SIZE: usize>([u8; SIZE], usize);
 
 impl<const SIZE: usize> Str<SIZE> {
     /// The empty string with at most SIZE octets.
-    pub const EMPTY: Str<SIZE> = Str([0; SIZE], 0);
+    pub const EMPTY: Str<SIZE> = Str::new_const("");
 
     /// Returns a new [`Str`] with the contents specified by the
     /// provided string-like entity.
+    ///
+    /// This functions guarantees well-formed UTF-8 strings.
     pub fn new<S: AsRef<str>>(string: S) -> Result<Self, ErrorOverflow> {
         let mut copstr = Self::default();
         copstr.replace(string)?;
@@ -43,11 +45,64 @@ impl<const SIZE: usize> Str<SIZE> {
     }
 
     /// Returns a new [`Str`] with the contents specified by the
-    /// provided string-like entity.
-    /// Truncates the input to SIZE.
+    /// provided string-like entity, truncated to fit.
+    ///
+    /// This functions guarantees well-formed UTF-8 strings.
     pub fn new_trunc<S: AsRef<str>>(string: S) -> Self {
         let mut copstr = Self::default();
         copstr.replace_trunc(string);
+        copstr
+    }
+
+    /// Create a new [`Str`] in const context, with the contents specified by the
+    /// provided string.
+    ///
+    /// This function works in const context but it doesn't guarantee
+    /// well-formed strings.
+    ///
+    /// This function panics if the string doesn't fit in SIZE bytes.
+    pub const fn new_const(string: &str) -> Self {
+        Self::new_const_u8(string.as_bytes())
+    }
+
+    /// Create a new [`Str`] in const context, with the contents specified by the
+    /// provided string, truncated to fit.
+    ///
+    /// This function works in const context but it doesn't guarantee
+    /// well-formed strings.
+    pub fn new_const_trunc(string: &str) -> Self {
+        Self::new_const_trunc_u8(string.as_bytes())
+    }
+
+    /// Create a new [`Str`] in const context, with the contents specified by the
+    /// provided array of `u8`.
+    ///
+    /// This function works in const context but it doesn't guarantee
+    /// well-formed strings.
+    ///
+    /// This function panics if the string doesn't fit in SIZE bytes.
+    pub const fn new_const_u8(bytes: &[u8]) -> Self {
+        assert!(bytes.len() <= SIZE);
+        Self::new_const_trunc_u8(bytes)
+    }
+
+    /// Create a new [`Str`] in const context, with the contents specified by the
+    /// provided array of `u8`, truncated to fit.
+    ///
+    /// This function works in const context but it doesn't guarantee
+    /// well-formed strings.
+    pub const fn new_const_trunc_u8(bytes: &[u8]) -> Self {
+        let len = if SIZE < bytes.len() {
+            SIZE
+        } else {
+            bytes.len()
+        };
+        let mut copstr = Str::<SIZE>([0; SIZE], len);
+        let mut i = 0;
+        while i < len {
+            copstr.0[i] = bytes[i];
+            i += 1;
+        }
         copstr
     }
 

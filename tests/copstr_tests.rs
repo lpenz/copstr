@@ -189,3 +189,12 @@ fn test_fromiter() -> Result<()> {
     assert_eq!("strings".chars().collect::<Str>(), Str::new("strin")?);
     Ok(())
 }
+
+#[test]
+fn test_const() -> Result<()> {
+    const TEST_U8: Str = Str::new_const_u8(b"test");
+    assert_eq!(TEST_U8.as_str(), "test");
+    const TEST: Str = Str::new_const("test");
+    assert_eq!(TEST.as_str(), "test");
+    Ok(())
+}
