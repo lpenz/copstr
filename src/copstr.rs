@@ -27,7 +27,7 @@ use std::str;
 ///
 /// Fixed-size string-like type that derives Copy. Size is specified
 /// via a const generic.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct Str<const SIZE: usize>([u8; SIZE], usize);
 
 impl<const SIZE: usize> Str<SIZE> {
@@ -144,6 +144,13 @@ impl<const SIZE: usize> AsRef<[u8]> for Str<SIZE> {
 }
 
 impl<const SIZE: usize> fmt::Display for Str<SIZE> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+/// The [`copstr::Str`] [`std::fmt::Debug`] implementation shows it as a string too
+impl<const SIZE: usize> fmt::Debug for Str<SIZE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
