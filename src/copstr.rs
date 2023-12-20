@@ -133,7 +133,7 @@ impl<const SIZE: usize> Str<SIZE> {
         let mut buffer = [0; 4];
         let result = ch.encode_utf8(&mut buffer).as_bytes();
         if result.len() > self.capacity() - self.byte_len() {
-            Err(ErrorOverflow::default())
+            Err(ErrorOverflow {})
         } else {
             let fromlen = self.0.split_at_mut(self.1).1;
             let dest = fromlen.split_at_mut(result.len()).0;
@@ -149,7 +149,7 @@ impl<const SIZE: usize> Str<SIZE> {
         let bytes = s.as_bytes();
         let byteslen = bytes.len();
         if byteslen > self.capacity() {
-            Err(ErrorOverflow::default())
+            Err(ErrorOverflow {})
         } else {
             let dest = self.0.split_at_mut(byteslen).0;
             dest.copy_from_slice(bytes);
