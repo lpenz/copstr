@@ -22,6 +22,7 @@ use std::hash;
 use std::iter;
 use std::ops;
 use std::str;
+use std::str::FromStr;
 
 /// Copy String type
 ///
@@ -195,6 +196,13 @@ impl<const SIZE: usize> TryFrom<&[u8]> for Str<SIZE> {
         let s = str::from_utf8(arr)?;
         let s = Self::new(s)?;
         Ok(s)
+    }
+}
+
+impl<const SIZE: usize> FromStr for Str<SIZE> {
+    type Err = ErrorOverflow;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Str::<SIZE>::try_from(s)
     }
 }
 

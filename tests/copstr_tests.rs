@@ -151,10 +151,32 @@ fn test_utf8_replace() -> Result<()> {
 }
 
 #[test]
+fn test_utf8_tryfrom_str() -> Result<()> {
+    let result = Str::try_from("basic")?;
+    assert_matches!(result.as_str(), "basic");
+    Ok(())
+}
+
+#[test]
+fn test_utf8_fromstr() -> Result<()> {
+    let result = "basic".parse::<Str>()?;
+    assert_matches!(result.as_str(), "basic");
+    Ok(())
+}
+
+#[test]
 fn test_utf8_overflow_tryfrom() -> Result<()> {
     let result = Str::try_from("basics".as_bytes());
     eprintln!("{}", result.clone().unwrap_err());
     assert_matches!(result, Err(copstr::Error::Overflow(_)));
+    Ok(())
+}
+
+#[test]
+fn test_utf8_overflow_fromstr() -> Result<()> {
+    let result = "basics".parse::<Str>();
+    eprintln!("{}", result.clone().unwrap_err());
+    assert_matches!(result, Err(copstr::ErrorOverflow));
     Ok(())
 }
 
