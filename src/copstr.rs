@@ -252,6 +252,18 @@ impl<const SIZE: usize> hash::Hash for Str<SIZE> {
     }
 }
 
+impl<const SIZE: usize> PartialOrd for Str<SIZE> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<const SIZE: usize> Ord for Str<SIZE> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.as_str().cmp(other.as_str())
+    }
+}
+
 impl<const SIZE: usize> iter::FromIterator<char> for Str<SIZE> {
     /// FromIterator truncates the input to SIZE
     fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
