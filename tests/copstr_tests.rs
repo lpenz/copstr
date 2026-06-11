@@ -2,8 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of this source code package.
 
-use copstr;
-
 use std::convert::TryFrom;
 use std::str;
 
@@ -25,7 +23,7 @@ macro_rules! assert_matches {
 /* Basic tests */
 
 fn assert_str(copstr: &Str, s: &str) {
-    assert_eq!(copstr.byte_len(), s.as_bytes().len());
+    assert_eq!(copstr.byte_len(), s.len());
     assert_eq!(copstr.as_str(), s);
     assert_eq!(copstr.as_ref() as &str, s);
     assert_eq!(copstr.as_ref() as &[u8], s.as_bytes());
@@ -47,7 +45,7 @@ fn test_basic() -> Result<()> {
     let basic2 = basic;
     assert_str(&basic2, "basic");
     // Test clone:
-    let basic3 = basic.clone();
+    let basic3 = basic;
     assert_str(&basic3, "basic");
     Ok(())
 }
@@ -85,10 +83,7 @@ fn test_push_err() -> Result<()> {
 
 #[test]
 fn test_tryfrom_err() -> Result<()> {
-    assert_eq!(
-        Str::try_from("string").unwrap_err(),
-        copstr::ErrorOverflow::default()
-    );
+    assert_eq!(Str::try_from("string").unwrap_err(), copstr::ErrorOverflow);
     assert_eq!(
         Str::try_from("length".as_bytes()).unwrap_err(),
         copstr::Error::Overflow(copstr::ErrorOverflow)
@@ -136,7 +131,7 @@ fn test_utf8_tryfrom() -> Result<()> {
 fn test_utf8_push() -> Result<()> {
     let mut space = Str::new(" ")?;
     let s = str::from_utf8(&SPARKLE_HEART)?;
-    space.push(s.chars().nth(0).unwrap())?;
+    space.push(s.chars().next().unwrap())?;
     assert_str(&space, " \u{1F496}");
     Ok(())
 }

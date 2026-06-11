@@ -318,8 +318,8 @@ impl From<ErrorOverflow> for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Overflow(ref e) => write!(f, "{}", e),
-            Error::Utf8(ref e) => write!(f, "{}", e),
+            Error::Overflow(e) => write!(f, "{}", e),
+            Error::Utf8(e) => write!(f, "{}", e),
         }
     }
 }
